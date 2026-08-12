@@ -25,4 +25,6 @@ Every parameter has a visible slider with:
 - tooltip text matching the parameter role;
 - keyboard focus.
 
-The paint layer is intentionally minimal: product name begins at `y=8`, compact function label at `y=32`, and one 1 px divider at `y=56`; controls start at absolute `y=64`. Do not add a full-canvas grid, tagline, package ID, decorative motif, fake visualizer, fake meter, panel frame, outer border, or parameter-driven atmospheric drawing. DSP behavior, parameter IDs, bundle identity, accessibility, and host automation identity are not part of UI simplification and stay unchanged.
+The paint layer provides only shared chrome: product name, compact function label, brand mark, and the 1 px divider. Below it, the V2 `ParameterDisplay` uses `DisplayKind::reverb` and is driven only from message-thread reads of real APVTS-attached slider values: `Size`, `Decay`, `Damping tilt`, and `Freeze`, each normalized with `Slider::valueToProportionOfLength`. This display is truthful parameter state, not an audio meter, waveform scope, DSP tap, or audio-thread visualizer.
+
+Controls use the shared rotary dial style with `TextBoxBelow` values and shared `controlCell()` geometry below the display. Do not add a full-canvas grid, tagline, package ID, decorative motif, fake meter, panel frame, outer border, or audio-reactive drawing. DSP behavior, parameter IDs, bundle identity, accessibility, and host automation identity are not part of UI simplification and stay unchanged.

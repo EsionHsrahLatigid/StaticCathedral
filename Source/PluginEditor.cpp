@@ -15,6 +15,9 @@ StaticCathedralAudioProcessorEditor::StaticCathedralAudioProcessorEditor(StaticC
     setWantsKeyboardFocus(true);
     setLookAndFeel(&lookAndFeel);
 
+    parameterDisplay.setComponentID("staticcathedral-parameter-display");
+    addAndMakeVisible(parameterDisplay);
+
     for (std::size_t i = 0; i < staticcathedral::parameters::all.size(); ++i)
     {
         auto& slider = sliders[i];
@@ -46,10 +49,13 @@ StaticCathedralAudioProcessorEditor::StaticCathedralAudioProcessorEditor(StaticC
     }
 
     setSize(defaultWidth, defaultHeight);
+    timerCallback();
+    startTimerHz(30);
 }
 
 StaticCathedralAudioProcessorEditor::~StaticCathedralAudioProcessorEditor()
 {
+    stopTimer();
     setLookAndFeel(nullptr);
     for (auto& label : labels)
         label.setLookAndFeel(nullptr);
@@ -64,7 +70,19 @@ void StaticCathedralAudioProcessorEditor::paint(juce::Graphics& g)
 
 void StaticCathedralAudioProcessorEditor::resized()
 {
+    parameterDisplay.setBounds(ehl::juce_design::parameterDisplayArea(getLocalBounds()));
+
     for (std::size_t i = 0; i < sliders.size(); ++i)
         ehl::juce_design::layoutLabelledControl(labels[i], sliders[i],
                                                 ehl::juce_design::controlCell(getLocalBounds(), i));
+}
+
+void StaticCathedralAudioProcessorEditor::timerCallback()
+{
+    parameterDisplay.setValues({
+        static_cast<float>(sliders[0].valueToProportionOfLength(sliders[0].getValue())),
+        static_cast<float>(sliders[1].valueToProportionOfLength(sliders[1].getValue())),
+        static_cast<float>(sliders[4].valueToProportionOfLength(sliders[4].getValue())),
+        static_cast<float>(sliders[8].valueToProportionOfLength(sliders[8].getValue())),
+    });
 }
