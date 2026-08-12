@@ -10,6 +10,11 @@
 #include <algorithm>
 #include <array>
 
+struct EditorTestAccess
+{
+    static void refresh(StaticCathedralAudioProcessorEditor& editor) { editor.timerCallback(); }
+};
+
 namespace
 {
 void checkSharedChromePaint(juce::AudioProcessorEditor& editor)
@@ -116,10 +121,11 @@ bool valuesDiffer(float a, float b)
     return std::abs(a - b) > 0.0001f;
 }
 
-void dispatchEditorTimer()
+void dispatchEditorTimer(juce::AudioProcessorEditor& editor)
 {
-    juce::Thread::sleep(40);
-    juce::Timer::callPendingTimersSynchronously();
+    auto* custom = dynamic_cast<StaticCathedralAudioProcessorEditor*>(&editor);
+    test_support::check(custom != nullptr, "custom editor is available for display refresh");
+    EditorTestAccess::refresh(*custom);
 }
 
 void checkDisplayValuesTrackSliders(juce::AudioProcessorEditor& editor)
@@ -131,7 +137,7 @@ void checkDisplayValuesTrackSliders(juce::AudioProcessorEditor& editor)
     auto* freeze = dynamic_cast<juce::Slider*>(editor.findChildWithID("staticcathedral-control-freeze"));
     test_support::check(size != nullptr && decay != nullptr && damping != nullptr && freeze != nullptr, "display source sliders exist");
 
-    dispatchEditorTimer();
+    dispatchEditorTimer(editor);
     const std::array<float, 4> expected {
         normalizedSliderValue(*size),
         normalizedSliderValue(*decay),
@@ -142,7 +148,7 @@ void checkDisplayValuesTrackSliders(juce::AudioProcessorEditor& editor)
 
     const auto before = display.getValues();
     damping->setValue(damping->getMaximum(), juce::dontSendNotification);
-    dispatchEditorTimer();
+    dispatchEditorTimer(editor);
     test_support::check(valuesDiffer(display.getValues()[2], before[2]), "changing damping slider updates display value");
 }
 } // namespace
