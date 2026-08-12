@@ -45,6 +45,7 @@ if(STATICCATHEDRAL_BUILD_PLUGIN)
             GIT_SHALLOW FALSE)
         FetchContent_MakeAvailable(JUCE)
     endif()
+    add_subdirectory(modules/juce-ehl-design-module)
 
     set(STATICCATHEDRAL_FORMATS VST3 Standalone)
     if(APPLE)
@@ -84,6 +85,7 @@ if(STATICCATHEDRAL_BUILD_PLUGIN)
     target_link_libraries(StaticCathedral
         PRIVATE
             staticcathedral_dsp
+            EHL::JuceDesign
             juce::juce_audio_utils
             juce::juce_dsp
         PUBLIC
@@ -154,7 +156,7 @@ if(STATICCATHEDRAL_BUILD_PLUGIN)
 
         add_executable(staticcathedral_editor_tests Tests/EditorTests.cpp)
         target_include_directories(staticcathedral_editor_tests PRIVATE Source)
-        target_link_libraries(staticcathedral_editor_tests PRIVATE StaticCathedral juce::juce_audio_utils)
+        target_link_libraries(staticcathedral_editor_tests PRIVATE StaticCathedral EHL::JuceDesign juce::juce_audio_utils)
         add_test(NAME staticcathedral_editor_tests COMMAND staticcathedral_editor_tests)
 
         add_test(

@@ -3,6 +3,8 @@
 #include "PluginEditor.h"
 #include "PluginProcessor.h"
 
+#include <ehl/juce_design/EhlDesign.h>
+
 #include <juce_events/juce_events.h>
 
 #include <algorithm>
@@ -11,17 +13,16 @@ namespace
 {
 void checkSimpleHeaderOnlyPaint(juce::AudioProcessorEditor& editor)
 {
-    const auto background = juce::Colour(0xff050505);
-    const auto divider = juce::Colour(0xff2a2a2a);
-    constexpr int headerLimit = 80;
+    const auto background = ehl::juce_design::Palette::ink();
+    const auto divider = ehl::juce_design::Palette::low();
 
-    juce::Image image(juce::Image::RGB, 320, 200, true);
+    juce::Image image(juce::Image::RGB, editor.getWidth(), editor.getHeight(), true);
     juce::Graphics g(image);
-    editor.setBounds(0, 0, image.getWidth(), image.getHeight());
     editor.paint(g);
 
     bool headerHasInk = false;
-    bool separatorBandIsSimple = true;
+    bool middleBandIsBackground = true;
+    bool dividerIsExact = true;
     bool bodyIsBackground = true;
     bool neutral = true;
 
@@ -36,35 +37,54 @@ void checkSimpleHeaderOnlyPaint(juce::AudioProcessorEditor& editor)
             const auto maxChannel = std::max({ pixel.getRed(), pixel.getGreen(), pixel.getBlue() });
             neutral = neutral && static_cast<int>(maxChannel) - static_cast<int>(minChannel) <= 4;
 
-            if (y < 64)
+            if (y < 48)
                 headerHasInk = headerHasInk || pixel != background;
-            else if (y < headerLimit)
+            else if (y < ehl::juce_design::Metrics::dividerY)
+                middleBandIsBackground = middleBandIsBackground && pixel == background;
+            else if (y == ehl::juce_design::Metrics::dividerY)
             {
-                const bool onDivider = y == 72 && x >= 32 && x < image.getWidth() - 32;
-                separatorBandIsSimple = separatorBandIsSimple && pixel == (onDivider ? divider : background);
+                const bool onDivider = x >= ehl::juce_design::Metrics::margin
+                                    && x < image.getWidth() - ehl::juce_design::Metrics::margin;
+                dividerIsExact = dividerIsExact && pixel == (onDivider ? divider : background);
             }
-            else if (y >= headerLimit)
+            else if (y >= ehl::juce_design::Metrics::headerHeight)
                 bodyIsBackground = bodyIsBackground && pixel == background;
         }
     }
 
     test_support::check(image.getPixelAt(0, 0) == background, "paint background is #050505");
-    test_support::check(headerHasInk, "paint keeps product identity inside the 80px header");
-    test_support::check(separatorBandIsSimple, "paint keeps only one divider in the 64px to 79px separator band");
-    test_support::check(bodyIsBackground, "paint draws no decorative motif, grid, panel, meter, or visualizer below the 80px header");
+    test_support::check(headerHasInk, "paint keeps product identity above y=48");
+    test_support::check(middleBandIsBackground, "paint keeps y=48..55 empty before the divider");
+    test_support::check(dividerIsExact, "paint draws the shared divider at y=56 from x=16 through width-17");
+    test_support::check(bodyIsBackground, "paint draws no decorative motif, grid, panel, meter, or visualizer at y>=64");
     test_support::check(neutral, "paint stays in the neutral monochrome ramp");
 }
 
-void checkControlBounds(juce::AudioProcessorEditor& editor, const juce::String& componentID)
+void checkControlContract(juce::AudioProcessorEditor& editor, const char* parameterID, std::size_t index)
 {
-    auto* control = editor.findChildWithID(componentID);
-    test_support::check(control != nullptr, "control exists: " + componentID.toStdString());
+    const juce::String id(parameterID);
+    auto* label = dynamic_cast<juce::Label*>(editor.findChildWithID("staticcathedral-label-" + id));
+    auto* control = dynamic_cast<juce::Slider*>(editor.findChildWithID("staticcathedral-control-" + id));
+    test_support::check(label != nullptr, "label exists: " + id.toStdString());
+    test_support::check(control != nullptr, "control exists: " + id.toStdString());
 
-    const auto bounds = control->getBounds();
-    test_support::check(!bounds.isEmpty(), "control has initial bounds: " + componentID.toStdString());
-    test_support::check(bounds.getY() >= 80, "control starts below the 80px header: " + componentID.toStdString());
-    test_support::check(bounds.getRight() <= editor.getWidth(), "control fits editor width: " + componentID.toStdString());
-    test_support::check(bounds.getBottom() <= editor.getHeight(), "control fits editor height: " + componentID.toStdString());
+    const auto expected = ehl::juce_design::labelledControlBounds(ehl::juce_design::controlCell(editor.getLocalBounds(), index));
+    test_support::check(label->getBounds() == expected.label, "label uses shared grid: " + id.toStdString());
+    test_support::check(control->getBounds() == expected.control, "control uses shared grid: " + id.toStdString());
+    test_support::check(control->getY() >= ehl::juce_design::Metrics::headerHeight, "control starts at or below y=64: " + id.toStdString());
+    test_support::check(control->getRight() <= editor.getWidth(), "control fits editor width: " + id.toStdString());
+    test_support::check(control->getBottom() <= editor.getHeight(), "control fits editor height: " + id.toStdString());
+    test_support::check(control->getSliderStyle() == juce::Slider::LinearHorizontal, "control uses shared slider style: " + id.toStdString());
+    test_support::check(control->getTextBoxWidth() == ehl::juce_design::Metrics::valueWidth, "control uses shared value width: " + id.toStdString());
+    test_support::check(control->findColour(juce::Slider::thumbColourId) == ehl::juce_design::Palette::paper(), "control uses shared paper thumb: " + id.toStdString());
+    test_support::check(control->findColour(juce::Slider::trackColourId) == ehl::juce_design::Palette::mid(), "control uses shared mid track: " + id.toStdString());
+    test_support::check(control->findColour(juce::Slider::backgroundColourId) == ehl::juce_design::Palette::low(), "control uses shared low background: " + id.toStdString());
+}
+
+void checkAllControlContracts(juce::AudioProcessorEditor& editor)
+{
+    for (std::size_t i = 0; i < staticcathedral::parameters::all.size(); ++i)
+        checkControlContract(editor, staticcathedral::parameters::all[i], i);
 }
 } // namespace
 
@@ -77,8 +97,10 @@ int main()
         auto* custom = dynamic_cast<StaticCathedralAudioProcessorEditor*>(editor.get());
         test_support::check(custom != nullptr, "custom editor type, not GenericAudioProcessorEditor");
         test_support::check(dynamic_cast<juce::GenericAudioProcessorEditor*>(editor.get()) == nullptr, "not GenericAudioProcessorEditor");
-        test_support::check(editor->getWidth() == StaticCathedralAudioProcessorEditor::defaultWidth, "default width");
-        test_support::check(editor->getHeight() == StaticCathedralAudioProcessorEditor::defaultHeight, "default height");
+        test_support::check(editor->getWidth() == ehl::juce_design::Metrics::defaultWidth, "default width");
+        test_support::check(editor->getHeight() == ehl::juce_design::Metrics::defaultHeight, "default height");
+        test_support::check(StaticCathedralAudioProcessorEditor::minimumWidth == ehl::juce_design::Metrics::minimumWidth, "minimum width");
+        test_support::check(StaticCathedralAudioProcessorEditor::minimumHeight == ehl::juce_design::Metrics::minimumHeight, "minimum height");
         test_support::check(editor->getComponentID() == "staticcathedral-editor", "editor component id");
         test_support::check(editor->getName().isNotEmpty(), "accessible name");
         test_support::check(custom->getTooltip().isNotEmpty(), "editor tooltip");
@@ -94,9 +116,14 @@ int main()
             test_support::check(control->getName().isNotEmpty(), "control has name: " + suffix);
             test_support::check(slider->getTooltip().isNotEmpty(), "control has tooltip: " + suffix);
             test_support::check(control->getWantsKeyboardFocus(), "control accepts keyboard focus: " + suffix);
-            checkControlBounds(*editor, juce::String("staticcathedral-control-") + id);
         }
 
+        editor->setBounds(0, 0, ehl::juce_design::Metrics::defaultWidth, ehl::juce_design::Metrics::defaultHeight);
+        checkAllControlContracts(*editor);
+        checkSimpleHeaderOnlyPaint(*editor);
+
+        editor->setBounds(0, 0, ehl::juce_design::Metrics::minimumWidth, ehl::juce_design::Metrics::minimumHeight);
+        checkAllControlContracts(*editor);
         checkSimpleHeaderOnlyPaint(*editor);
     });
 }
