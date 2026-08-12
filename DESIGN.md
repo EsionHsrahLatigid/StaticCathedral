@@ -16,7 +16,7 @@ The delay lengths are fixed rather than sample-rate scaled so the prime-length a
 
 ## UI
 
-The editor follows the DHN9 shared visual contract: 960 x 544 default, 720 x 432 minimum, 8 px grid, grayscale only, no image assets, no external fonts, and no `GenericAudioProcessorEditor`.
+The editor follows the DHN9 simple monochrome 8-bit contract: 960 x 544 default, 720 x 432 minimum, 4 px base spacing with 8 px major spacing, no image assets, no external fonts, and no `GenericAudioProcessorEditor`. The only UI colors are the four-level palette `#050505`, `#2A2A2A`, `#8A8A86`, `#F2F2F0`.
 
 Every parameter has a visible slider with:
 
@@ -25,4 +25,4 @@ Every parameter has a visible slider with:
 - tooltip text matching the parameter role;
 - keyboard focus.
 
-The motif is a procedural grayscale 8-bit cathedral: block arches driven by Size/Decay/Diffusion and a bottom decay skyline driven by Smear/Freeze. It is intentionally simple and inspectable rather than asset-based.
+The paint layer is intentionally minimal: product name at `y=16`, compact function label at `y=48`, and one 1 px divider at `y=72`; controls start at absolute `y=80`. Do not add a full-canvas grid, tagline, package ID, decorative motif, fake visualizer, fake meter, panel frame, outer border, or parameter-driven atmospheric drawing. DSP behavior, parameter IDs, bundle identity, accessibility, and host automation identity are not part of UI simplification and stay unchanged.

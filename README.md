@@ -51,7 +51,7 @@ artifacts/plugin-release/windows-x64/ARTIFACTS.txt
 
 - `staticcathedral_dsp_tests`: prime delay structure, early density, deterministic decay, damping contrast, bounded freeze, finite/reset behavior, mono/stereo processing.
 - `staticcathedral_plugin_tests`: metadata, matched mono/stereo bus layouts, state round-trip, invalid-state tolerance, finite audio processing.
-- `staticcathedral_editor_tests`: custom editor contract, no generic editor, accessible named/tooltipped controls for every parameter, grayscale procedural motif.
+- `staticcathedral_editor_tests`: custom editor contract, no generic editor, accessible named/tooltipped controls for every parameter, minimal monochrome header-only paint with no decoration below y=80.
 - `staticcathedral_artifact_contract`: staged product paths and bundle shape.
 
 ## Limits
