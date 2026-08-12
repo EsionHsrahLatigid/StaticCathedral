@@ -67,6 +67,8 @@ int main()
                 test_support::check(std::isfinite(stereoBuffer.getSample(ch, i)), "processed stereo samples finite");
 
         StaticCathedralAudioProcessor monoProcessor;
+        test_support::check(monoProcessor.setBusesLayout(layoutFor(juce::AudioChannelSet::mono(), juce::AudioChannelSet::mono())),
+            "mono processor bus layout applied");
         monoProcessor.prepareToPlay(44100.0, 32);
         juce::AudioBuffer<float> monoBuffer(1, 32);
         monoBuffer.setSample(0, 0, 0.7f);
