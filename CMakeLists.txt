@@ -8,6 +8,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(STATICCATHEDRAL_BUILD_PLUGIN "Build the JUCE plug-in targets" ON)
 option(STATICCATHEDRAL_BUILD_TESTS "Build the test targets" ON)
+set(EHL_COPY_PLUGIN_AFTER_BUILD_DEFAULT OFF)
+if(APPLE AND NOT DEFINED ENV{CI})
+    set(EHL_COPY_PLUGIN_AFTER_BUILD_DEFAULT ON)
+endif()
+option(EHL_COPY_PLUGIN_AFTER_BUILD
+    "Copy built plug-in formats to the current user's standard plug-in folders"
+    ${EHL_COPY_PLUGIN_AFTER_BUILD_DEFAULT})
 set(STATICCATHEDRAL_ARTIFACT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/artifacts" CACHE PATH "Stable product staging root")
 set(EHL_JUCE_SOURCE_DIR "" CACHE PATH "Existing JUCE source checkout; avoids network when set")
 
@@ -52,6 +59,14 @@ if(STATICCATHEDRAL_BUILD_PLUGIN)
         list(APPEND STATICCATHEDRAL_FORMATS AU)
     endif()
 
+    set(EHL_PLUGIN_COPY_ARGS
+        COPY_PLUGIN_AFTER_BUILD ${EHL_COPY_PLUGIN_AFTER_BUILD})
+    if(APPLE)
+        list(APPEND EHL_PLUGIN_COPY_ARGS
+            VST3_COPY_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3"
+            AU_COPY_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
+    endif()
+
     juce_add_plugin(StaticCathedral
         VERSION ${PROJECT_VERSION}
         COMPANY_NAME "EsionHsrahLatigid"
@@ -68,7 +83,7 @@ if(STATICCATHEDRAL_BUILD_PLUGIN)
         EDITOR_WANTS_KEYBOARD_FOCUS TRUE
         MICROPHONE_PERMISSION_ENABLED TRUE
         MICROPHONE_PERMISSION_TEXT "StaticCathedral processes live audio input."
-        COPY_PLUGIN_AFTER_BUILD FALSE)
+        ${EHL_PLUGIN_COPY_ARGS})
 
     target_sources(StaticCathedral PRIVATE
         Source/ParameterIDs.h

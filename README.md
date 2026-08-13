@@ -47,6 +47,13 @@ artifacts/plugin-release/windows-x64/vst3/staticcathedral_vst3_plugin.vst3
 artifacts/plugin-release/windows-x64/ARTIFACTS.txt
 ```
 
+Local macOS plug-in builds also copy the loadable formats to the standard user folders:
+
+- `~/Library/Audio/Plug-Ins/VST3/StaticCathedral.vst3`
+- `~/Library/Audio/Plug-Ins/Components/StaticCathedral.component`
+
+Standalone remains in the artifact tree. CI and non-macOS configurations do not copy by default. Any configuration can override the behavior with `-DEHL_COPY_PLUGIN_AFTER_BUILD=ON` or `OFF`.
+
 ## Tests
 
 - `staticcathedral_dsp_tests`: prime delay structure, early density, deterministic decay, damping contrast, bounded freeze, finite/reset behavior, mono/stereo processing.
