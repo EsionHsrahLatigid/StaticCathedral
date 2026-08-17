@@ -1,6 +1,6 @@
 # StaticCathedral
 
-StaticCathedral is an EsionHsrahLatigid Digital Harsh Noise reverb plugin. It is intentionally metallic and hostile: an eight-line prime-length feedback delay network with input/output diffusion, frequency-dependent damping, deterministic delay modulation, bounded freeze, and a saturating feedback guard.
+StaticCathedral is an EsionHsrahLatigid feedback-network reverb plugin. It is intentionally metallic and hostile: an eight-line prime-length feedback delay network with input/output diffusion, frequency-dependent damping, deterministic delay modulation, bounded freeze, and a saturating feedback guard.
 
 ## Identity
 
