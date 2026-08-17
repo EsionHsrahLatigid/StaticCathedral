@@ -2,7 +2,7 @@
 
 ## DSP
 
-The reverb core is `staticcathedral::dsp::FoundationDSP`, retained as a generated target name but implemented as the StaticCathedral engine.
+The reverb core is `staticcathedral::dsp::StaticCathedralDSP`, the bounded StaticCathedral feedback-network engine.
 
 - Eight fixed prime delay lengths: `1151`, `1427`, `1699`, `1999`, `2371`, `2749`, `3167`, `3571` samples.
 - Feedback matrix: Householder orthogonal matrix, energy-preserving before damping, gain, freeze, and guard stages.

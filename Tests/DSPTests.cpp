@@ -1,5 +1,5 @@
 #include "TestSupport.h"
-#include "dsp/FoundationDSP.h"
+#include "dsp/StaticCathedralDSP.h"
 
 #include <algorithm>
 #include <cmath>
@@ -40,7 +40,7 @@ staticcathedral::dsp::ReverbParameters wetParams()
 
 std::vector<float> renderImpulse(const staticcathedral::dsp::ReverbParameters& params, int samples)
 {
-    auto dsp = std::make_unique<staticcathedral::dsp::FoundationDSP>();
+    auto dsp = std::make_unique<staticcathedral::dsp::StaticCathedralDSP>();
     dsp->setTargets(params);
     dsp->prepare(48000.0, 512, 2);
     std::vector<float> output(static_cast<std::size_t>(samples));
@@ -74,10 +74,10 @@ float absoluteDifference(const std::vector<float>& values, int begin, int end)
 int main()
 {
     return test_support::run("staticcathedral_dsp_tests", [] {
-        for (const auto length : staticcathedral::dsp::FoundationDSP::primeDelayLengths)
+        for (const auto length : staticcathedral::dsp::StaticCathedralDSP::primeDelayLengths)
             test_support::check(isPrime(length), "all FDN delay lengths are prime");
 
-        auto lengths = staticcathedral::dsp::FoundationDSP::primeDelayLengths;
+        auto lengths = staticcathedral::dsp::StaticCathedralDSP::primeDelayLengths;
         std::sort(lengths.begin(), lengths.end());
         test_support::check(std::adjacent_find(lengths.begin(), lengths.end()) == lengths.end(), "prime delay lengths are unique");
 
@@ -105,7 +105,7 @@ int main()
         frozen.decay = 1.0f;
         frozen.freeze = 1.0f;
         frozen.feedbackGuard = 1.0f;
-        auto freezeDsp = std::make_unique<staticcathedral::dsp::FoundationDSP>();
+        auto freezeDsp = std::make_unique<staticcathedral::dsp::StaticCathedralDSP>();
         freezeDsp->setTargets(frozen);
         freezeDsp->prepare(48000.0, 256, 2);
         float previousWindow = 0.0f;
@@ -126,7 +126,7 @@ int main()
         test_support::check(currentWindow <= previousWindow * 1.12f + 0.0001f, "freeze remains bounded rather than growing");
         test_support::check(freezeDsp->currentFeedbackGain() < 1.0f, "feedback spectral radius kept below unity");
 
-        auto finiteDsp = std::make_unique<staticcathedral::dsp::FoundationDSP>();
+        auto finiteDsp = std::make_unique<staticcathedral::dsp::StaticCathedralDSP>();
         finiteDsp->setTargets(params);
         finiteDsp->prepare(44100.0, 0, 1);
         for (int i = 0; i < 128; ++i)
@@ -138,7 +138,7 @@ int main()
         const auto resetB = finiteDsp->processMono(0.25f);
         test_support::check(resetA == resetB, "reset restores deterministic state");
 
-        auto stereoDsp = std::make_unique<staticcathedral::dsp::FoundationDSP>();
+        auto stereoDsp = std::make_unique<staticcathedral::dsp::StaticCathedralDSP>();
         stereoDsp->setTargets(params);
         stereoDsp->prepare(48000.0, 128, 2);
         float left = 0.0f;

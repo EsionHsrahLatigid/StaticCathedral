@@ -19,7 +19,7 @@ set(STATICCATHEDRAL_ARTIFACT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/artifacts" CACHE 
 set(EHL_JUCE_SOURCE_DIR "" CACHE PATH "Existing JUCE source checkout; avoids network when set")
 
 add_library(staticcathedral_dsp STATIC
-    Source/dsp/FoundationDSP.cpp)
+    Source/dsp/StaticCathedralDSP.cpp)
 target_include_directories(staticcathedral_dsp PUBLIC Source)
 target_compile_features(staticcathedral_dsp PUBLIC cxx_std_17)
 if(MSVC)
@@ -72,7 +72,7 @@ if(STATICCATHEDRAL_BUILD_PLUGIN)
         COMPANY_NAME "EsionHsrahLatigid"
         BUNDLE_ID "jp.ehl.staticcathedral"
         PRODUCT_NAME "StaticCathedral"
-        DESCRIPTION "eight-line harsh-noise FDN reverb"
+        DESCRIPTION "eight-line feedback-network reverb"
         PLUGIN_MANUFACTURER_CODE EHL_
         PLUGIN_CODE StCt
         FORMATS ${STATICCATHEDRAL_FORMATS}

@@ -32,7 +32,7 @@ cmake --build --preset plugin-release --parallel 2
 ctest --preset plugin-release --output-on-failure
 ```
 
-If `EHL_JUCE_SOURCE_DIR` is not provided, CMake FetchContent uses JUCE commit `91ad83ae34a81e0833b1a2b0866f54846370ae53`, matching the DHN9/Plitch baseline.
+If `EHL_JUCE_SOURCE_DIR` is not provided, CMake FetchContent uses JUCE commit `91ad83ae34a81e0833b1a2b0866f54846370ae53`, the pinned JUCE source used by this repository's CI and local plugin builds.
 
 Stable staged artifacts:
 
@@ -63,4 +63,4 @@ Standalone remains in the artifact tree. CI and non-macOS configurations do not 
 
 ## Limits
 
-StaticCathedral is bounded and finite, but it is a harsh-noise effect, not a hearing-safety device. The feedback matrix is orthogonal before damping/guard stages and effective feedback gain is kept below unity; output is still capable of aggressive full-scale texture by design.
+StaticCathedral is bounded and finite, but it is not a hearing-safety device. The feedback matrix is orthogonal before damping/guard stages and effective feedback gain is kept below unity; output is still capable of aggressive full-scale texture by design.

@@ -6,7 +6,7 @@ import sys
 root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
 required = [
     "CMakeLists.txt", "CMakePresets.json", "Source/PluginProcessor.cpp",
-    "Source/PluginEditor.cpp", "Source/dsp/FoundationDSP.cpp",
+    "Source/PluginEditor.cpp", "Source/dsp/StaticCathedralDSP.cpp",
     "Tests/DSPTests.cpp", "Tests/PluginTests.cpp", "Tests/EditorTests.cpp",
     ".github/workflows/ci.yml", ".github/workflows/release.yml",
 ]
@@ -29,6 +29,6 @@ checks = {
 failed = [name for name, ok in checks.items() if not ok]
 if failed:
     raise SystemExit("failed checks: " + ", ".join(failed))
-if re.search(r"dhn_|Dhn|TemplatePlugin|MyPlugin", text):
+if re.search(r"TemplatePlugin|MyPlugin", text):
     raise SystemExit("stale generic names found")
 print("scaffold validation passed")

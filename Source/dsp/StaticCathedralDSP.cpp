@@ -1,17 +1,17 @@
-#include "dsp/FoundationDSP.h"
+#include "dsp/StaticCathedralDSP.h"
 
 #include <cmath>
 
 namespace staticcathedral::dsp
 {
-void FoundationDSP::prepare(double sampleRate, int, int channels) noexcept
+void StaticCathedralDSP::prepare(double sampleRate, int, int channels) noexcept
 {
     sampleRate_ = std::isfinite(sampleRate) && sampleRate > 1000.0 ? sampleRate : 44100.0;
     channels_ = channels < 0 ? 0 : (channels > maxChannels ? maxChannels : channels);
     reset();
 }
 
-void FoundationDSP::reset() noexcept
+void StaticCathedralDSP::reset() noexcept
 {
     for (auto& state : channelStates_)
     {
@@ -35,7 +35,7 @@ void FoundationDSP::reset() noexcept
     modulationPhase_ = 0.0f;
 }
 
-void FoundationDSP::setTargets(const ReverbParameters& parameters) noexcept
+void StaticCathedralDSP::setTargets(const ReverbParameters& parameters) noexcept
 {
     target_ = sanitizeParameters(parameters);
     const float freezeGain = lerp(0.985f, 0.9975f, target_.freeze);
@@ -44,7 +44,7 @@ void FoundationDSP::setTargets(const ReverbParameters& parameters) noexcept
     dampingCoefficientTarget_ = clamp(0.08f + target_.dampingTilt * 0.70f, 0.08f, 0.78f);
 }
 
-void FoundationDSP::processFrame(float inputLeft, float inputRight, float& outputLeft, float& outputRight) noexcept
+void StaticCathedralDSP::processFrame(float inputLeft, float inputRight, float& outputLeft, float& outputRight) noexcept
 {
     smoothParameters();
 
@@ -65,7 +65,7 @@ void FoundationDSP::processFrame(float inputLeft, float inputRight, float& outpu
     outputRight = sanitize(inputRight + (spreadRight - inputRight) * mix);
 }
 
-float FoundationDSP::processMono(float input) noexcept
+float StaticCathedralDSP::processMono(float input) noexcept
 {
     float left = 0.0f;
     float right = 0.0f;
@@ -73,7 +73,7 @@ float FoundationDSP::processMono(float input) noexcept
     return 0.5f * (left + right);
 }
 
-float FoundationDSP::processChannel(float input, int channel, float stereoSign) noexcept
+float StaticCathedralDSP::processChannel(float input, int channel, float stereoSign) noexcept
 {
     auto& state = channelStates_[channel <= 0 ? 0 : 1];
 
@@ -124,7 +124,7 @@ float FoundationDSP::processChannel(float input, int channel, float stereoSign) 
     return clamp(sanitize(wet), -1.25f, 1.25f);
 }
 
-void FoundationDSP::smoothParameters() noexcept
+void StaticCathedralDSP::smoothParameters() noexcept
 {
     constexpr float smoothing = 0.0018f;
     current_.size += (target_.size - current_.size) * smoothing;
@@ -147,7 +147,7 @@ void FoundationDSP::smoothParameters() noexcept
         modulationPhase_ -= twoPi;
 }
 
-float FoundationDSP::feedbackMatrixRow(const std::array<float, lineCount>& reads, int row) const noexcept
+float StaticCathedralDSP::feedbackMatrixRow(const std::array<float, lineCount>& reads, int row) const noexcept
 {
     float sum = 0.0f;
     for (float value : reads)
@@ -155,27 +155,27 @@ float FoundationDSP::feedbackMatrixRow(const std::array<float, lineCount>& reads
     return sum * (2.0f / static_cast<float>(lineCount)) - reads[static_cast<std::size_t>(row)];
 }
 
-float FoundationDSP::sanitize(float value) noexcept
+float StaticCathedralDSP::sanitize(float value) noexcept
 {
     return std::isfinite(value) ? value : 0.0f;
 }
 
-float FoundationDSP::clamp(float value, float lo, float hi) noexcept
+float StaticCathedralDSP::clamp(float value, float lo, float hi) noexcept
 {
     return value < lo ? lo : (value > hi ? hi : value);
 }
 
-float FoundationDSP::softLimit(float value) noexcept
+float StaticCathedralDSP::softLimit(float value) noexcept
 {
     return std::tanh(clamp(value, -8.0f, 8.0f));
 }
 
-float FoundationDSP::lerp(float a, float b, float t) noexcept
+float StaticCathedralDSP::lerp(float a, float b, float t) noexcept
 {
     return a + (b - a) * clamp(t, 0.0f, 1.0f);
 }
 
-float FoundationDSP::readFractional(const std::array<float, maxDelayLength>& buffer, int writePosition, float delaySamples) noexcept
+float StaticCathedralDSP::readFractional(const std::array<float, maxDelayLength>& buffer, int writePosition, float delaySamples) noexcept
 {
     const float boundedDelay = clamp(delaySamples, 1.0f, static_cast<float>(maxDelayLength - 3));
     const int delayInt = static_cast<int>(boundedDelay);
@@ -185,7 +185,7 @@ float FoundationDSP::readFractional(const std::array<float, maxDelayLength>& buf
     return buffer[static_cast<std::size_t>(indexA)] * (1.0f - fraction) + buffer[static_cast<std::size_t>(indexB)] * fraction;
 }
 
-float FoundationDSP::processAllpass(std::array<float, preDelayLength>& buffer, int& writePosition, int delaySamples, float coefficient, float input) noexcept
+float StaticCathedralDSP::processAllpass(std::array<float, preDelayLength>& buffer, int& writePosition, int delaySamples, float coefficient, float input) noexcept
 {
     const int boundedDelay = delaySamples < 1 ? 1 : (delaySamples >= preDelayLength ? preDelayLength - 1 : delaySamples);
     const int readPosition = (writePosition - boundedDelay + preDelayLength) % preDelayLength;
@@ -196,7 +196,7 @@ float FoundationDSP::processAllpass(std::array<float, preDelayLength>& buffer, i
     return sanitize(output);
 }
 
-ReverbParameters FoundationDSP::sanitizeParameters(const ReverbParameters& parameters) noexcept
+ReverbParameters StaticCathedralDSP::sanitizeParameters(const ReverbParameters& parameters) noexcept
 {
     ReverbParameters safe {};
     safe.size = clamp(sanitize(parameters.size), 0.0f, 1.0f);

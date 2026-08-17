@@ -21,7 +21,7 @@ struct ReverbParameters
     float mix { 0.42f };
 };
 
-class FoundationDSP
+class StaticCathedralDSP
 {
 public:
     static constexpr int lineCount = 8;
