@@ -15,7 +15,7 @@ This config builds only the JUCE-independent DSP test target.
 ## Plugin Release
 
 ```sh
-cmake --preset plugin-release -DEHL_JUCE_SOURCE_DIR=/Users/2bit/prog/juce/Plitch/build/release/_deps/juce-src
+cmake --preset plugin-release -DEHL_JUCE_SOURCE_DIR=<path-to-juce-source>
 cmake --build --preset plugin-release --parallel 2
 ctest --preset plugin-release --output-on-failure
 ```
